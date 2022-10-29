@@ -443,7 +443,7 @@ static void sm7250_get_batt_id(const struct bms_dev *bms, int *batt_id_ohm)
 
 	batt_id_mv = div_s64(batt_id_mv, 1000);
 	if (batt_id_mv == 0) {
-		pr_info("batt_id_mv = 0 from ADC\n");
+		pr_debug("batt_id_mv = 0 from ADC\n");
 		return;
 	}
 
@@ -454,7 +454,7 @@ static void sm7250_get_batt_id(const struct bms_dev *bms, int *batt_id_ohm)
 	}
 
 	*batt_id_ohm = div64_u64(BID_RPULL_OHM * 1000 + denom / 2, denom);
-	pr_info("batt_id = %d\n", *batt_id_ohm);
+	pr_debug("batt_id = %d\n", *batt_id_ohm);
 }
 
 #define QG_DATA_CTL2_REG			0x42
@@ -560,7 +560,7 @@ int sm7250_rerun_aicl(const struct bms_dev *bms)
 		return rc;
 	}
 
-	pr_info("Re-running AICL (susp=%d)\n",
+	pr_debug("Re-running AICL (susp=%d)\n",
 		(stat & USBIN_SUSPEND_STS_BIT) !=0 );
 
 	/* USB is suspended so skip re-running AICL */
@@ -721,7 +721,7 @@ static int sm7250_get_chg_chgr_state(const struct bms_dev *bms,
 	}
 	chg_state->f.icl = (icl * 50);
 
-	pr_info("MSC_PCS chg_state=%lx [0x%x:%d:%d:%d:%d] chg=%c\n",
+	pr_debug("MSC_PCS chg_state=%lx [0x%x:%d:%d:%d:%d] chg=%c\n",
 		(unsigned long)chg_state->v,
 		chg_state->f.flags,
 		chg_state->f.chg_type,
@@ -735,7 +735,7 @@ static int sm7250_get_chg_chgr_state(const struct bms_dev *bms,
 	if ((!rc) && (reg & CHG_P_DCIN_PLUGIN_BIT) &&
 	    (!(reg & CHG_P_DCIN_EN_BIT))) {
 		val = CHG_P_DCIN_EN_OVERRIDE_BIT | CHG_P_DCIN_EN_VALUE_BIT;
-		pr_info("MSC_PCS: reset DCIN enable pin\n");
+		pr_debug("MSC_PCS: reset DCIN enable pin\n");
 		sm7250_write(bms->pmic_regmap, CHG_P_DCIN_CMD_IL_REG, &val, 1);
 	}
 
@@ -815,7 +815,7 @@ static int sm7250_get_batt_iterm(struct bms_dev *bms)
 			rc);
 		return rc;
 	}
-	pr_info("CHGR_ENG_CHARGING_CFG_REG = 0x%02x\n", stat);
+	pr_debug("CHGR_ENG_CHARGING_CFG_REG = 0x%02x\n", stat);
 
 	if (stat & CHGR_ITERM_USE_ANALOG_BIT) {
 		return -EINVAL;
@@ -1007,7 +1007,7 @@ static int sm7250_charge_disable(struct bms_dev *bms, bool disable)
 				 CHGR_CHARGING_ENABLE_CMD,
 				 CHARGING_ENABLE_CMD_BIT, val);
 
-	pr_info("CHARGE_DISABLE : disable=%d -> val=%d (%d)\n",
+	pr_debug("CHARGE_DISABLE : disable=%d -> val=%d (%d)\n",
 		disable, val, rc);
 
 	return rc;
@@ -1022,7 +1022,7 @@ static int sm7250_charge_pause(struct bms_dev *bms, bool pause)
 				 CHGR_CHARGING_PAUSE_CMD,
 				 CHARGING_PAUSE_CMD_BIT, val);
 
-	pr_info("CHARGE_PAUSE : pause=%d -> val=%d (%d)\n",
+	pr_debug("CHARGE_PAUSE : pause=%d -> val=%d (%d)\n",
 		pause, val, rc);
 
 	return rc;
@@ -1078,7 +1078,7 @@ static int sm7250_psy_set_property(struct power_supply *psy,
 			}
 		}
 
-		pr_info("CONSTANT_CHARGE_CURRENT_MAX : ivalue=%d, val=%d pause=%d (%d)\n",
+		pr_debug("CONSTANT_CHARGE_CURRENT_MAX : ivalue=%d, val=%d pause=%d (%d)\n",
 			ivalue, val, ivalue == 0, rc);
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_MAX:
@@ -1097,7 +1097,7 @@ static int sm7250_psy_set_property(struct power_supply *psy,
 		rc = sm7250_write(bms->pmic_regmap,
 					CHGR_FLOAT_VOLTAGE_SETTING,
 					&val, 1);
-		pr_info("CONSTANT_CHARGE_VOLTAGE_MAX : ivalue=%d, val=%d (%d)\n",
+		pr_debug("CONSTANT_CHARGE_VOLTAGE_MAX : ivalue=%d, val=%d (%d)\n",
 							ivalue, val, rc);
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_DISABLE:
@@ -1116,7 +1116,7 @@ static int sm7250_psy_set_property(struct power_supply *psy,
 		rc = sm7250_masked_write(bms->pmic_regmap,
 					 CHGR_SAFETY_TIMER_ENABLE_CFG_REG,
 					 FAST_CHARGE_SAFETY_TIMER_EN, val);
-		pr_info("SAFETY_TIMER_ENABLE : val=%d (%d)\n", val, rc);
+		pr_debug("SAFETY_TIMER_ENABLE : val=%d (%d)\n", val, rc);
 		break;
 	default:
 		pr_err("setting unsupported property: %d\n", psp);
@@ -1220,7 +1220,7 @@ static int sm7250_parse_dt_fg(struct bms_dev *bms, struct device_node *node)
 		return -EPROBE_DEFER;
 	}
 
-	pr_info("node %s PMIC subtype %d Digital major %d\n",
+	pr_debug("node %s PMIC subtype %d Digital major %d\n",
 		node->name, pmic_rev_id->pmic_subtype, pmic_rev_id->rev4);
 
 	for_each_available_child_of_node(node, child) {
@@ -1236,7 +1236,7 @@ static int sm7250_parse_dt_fg(struct bms_dev *bms, struct device_node *node)
 			return rc;
 		}
 
-		pr_info("QG_TYPE %d\n", QG_TYPE);
+		pr_debug("QG_TYPE %d\n", QG_TYPE);
 		switch (type) {
 		case QG_TYPE:
 			bms->rradc_base = base;
@@ -1299,7 +1299,7 @@ static int bms_probe(struct platform_device *pdev)
 
 	bms = devm_kzalloc(&pdev->dev, sizeof(*bms), GFP_KERNEL);
 	if (!bms) {
-		pr_info("kalloc error\n");
+		pr_debug("kalloc error\n");
 		return -ENOMEM;
 	}
 
@@ -1376,7 +1376,7 @@ static int bms_probe(struct platform_device *pdev)
 		goto exit;
 	}
 
-	pr_info("BMS driver probed successfully\n");
+	pr_debug("BMS driver probed successfully\n");
 
 	return 0;
 exit:

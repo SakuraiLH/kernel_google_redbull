@@ -1000,7 +1000,7 @@ static void sec_ts_check_rawdata(struct work_struct *work)
 
 static void dump_tsp_log(void)
 {
-	pr_info("%s: %s %s: start\n", SEC_TS_NAME, SECLOG, __func__);
+	pr_debug("%s: %s %s: start\n", SEC_TS_NAME, SECLOG, __func__);
 
 #ifdef CONFIG_BATTERY_SAMSUNG
 	if (lpcharge == 1) {
@@ -2251,10 +2251,10 @@ static void sec_ts_offload_set_running(struct sec_ts_data *ts, bool running)
 	if (ts->offload.offload_running != running) {
 		ts->offload.offload_running = running;
 		if (running && ts->offload.config.filter_grip) {
-			pr_info("%s: disabling FW grip.\n", __func__);
+			pr_debug("%s: disabling FW grip.\n", __func__);
 			sec_ts_enable_grip(ts, false);
 		} else {
-			pr_info("%s: enabling FW grip.\n", __func__);
+			pr_debug("%s: enabling FW grip.\n", __func__);
 			sec_ts_enable_grip(ts, true);
 		}
 	}
@@ -4631,7 +4631,7 @@ static void sec_ts_shutdown(struct i2c_client *client)
 static void sec_ts_shutdown(struct spi_device *client)
 #endif
 {
-	pr_info("%s\n", __func__);
+	pr_debug("%s\n", __func__);
 	if (ts_dup)
 		sec_ts_remove(client);
 }

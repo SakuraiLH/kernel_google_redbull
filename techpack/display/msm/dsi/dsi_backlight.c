@@ -379,7 +379,7 @@ static u32 dsi_backlight_calculate_hbm(struct dsi_backlight_config *bl,
 	if (hbm->cur_range != target_range) {
 		dsi_backlight_hbm_dimming_start(bl, range->num_dimming_frames,
 			&range->dimming_stop_cmd);
-		pr_info("hbm: range %d -> %d\n", hbm->cur_range, target_range);
+		pr_debug("hbm: range %d -> %d\n", hbm->cur_range, target_range);
 		hbm->cur_range = target_range;
 
 		rc = dsi_panel_switch_update_hbm(panel);
@@ -600,7 +600,7 @@ static int dsi_panel_bl_parse_dynamic_elvss(struct device *parent,
 
 	elvss_ranges_np = of_get_child_by_name(of_node, "google,elvss-ranges");
 	if (!elvss_ranges_np) {
-		pr_info("ELVSS modes list not found\n");
+		pr_debug("ELVSS modes list not found\n");
 		return 0;
 	}
 
@@ -690,7 +690,7 @@ static int dsi_backlight_update_status(struct backlight_device *bd)
 	dsi_backlight_hbm_dimming_restart(bl);
 
 	if (dsi_panel_initialized(panel) && bl->update_bl) {
-		pr_info("req:%d bl:%d state:0x%x\n",
+		pr_debug("req:%d bl:%d state:0x%x\n",
 			bd->props.brightness, bl_lvl, bd->props.state);
 
 		dsi_panel_bl_elvss_update(bd, ELVSS_PRE_UPDATE);
@@ -770,13 +770,13 @@ static ssize_t alpm_mode_store(struct device *dev,
 	if (bl->bl_device->props.state & BL_CORE_FBBLANK) {
 		return -EINVAL;
 	} else if ((alpm_mode == 1) && (lp_state != BL_STATE_LP)) {
-		pr_info("activating lp1 mode\n");
+		pr_debug("activating lp1 mode\n");
 		dsi_panel_set_lp1(panel);
 	} else if ((alpm_mode > 1) && !(lp_state & BL_STATE_LP2)) {
-		pr_info("activating lp2 mode\n");
+		pr_debug("activating lp2 mode\n");
 		dsi_panel_set_lp2(panel);
 	} else if (!alpm_mode && lp_state) {
-		pr_info("activating normal mode\n");
+		pr_debug("activating normal mode\n");
 		dsi_panel_set_nolp(panel);
 	}
 
@@ -1091,7 +1091,7 @@ static int dsi_backlight_register(struct dsi_backlight_config *bl)
 
 	reg = regulator_get_optional(panel->parent, "lab");
 	if (!PTR_ERR_OR_ZERO(reg)) {
-		pr_info("LAB regulator found\n");
+		pr_debug("LAB regulator found\n");
 		panel->bl_config.lab_vreg = reg;
 	}
 
@@ -1153,7 +1153,7 @@ int dsi_backlight_early_dpms(struct dsi_backlight_config *bl, int power_mode)
 	if (!bd)
 		return 0;
 
-	pr_info("power_mode:%d state:0x%0x\n", power_mode, bd->props.state);
+	pr_debug("power_mode:%d state:0x%0x\n", power_mode, bd->props.state);
 
 	mutex_lock(&bl->state_lock);
 	state = get_state_after_dpms(bl, power_mode);
@@ -1208,7 +1208,7 @@ int dsi_backlight_late_dpms(struct dsi_backlight_config *bl, int power_mode)
 	backlight_update_status(bd);
 	sysfs_notify(&bd->dev.kobj, NULL, "state");
 
-	pr_info("sysfs_notify state:0x%0x\n", bd->props.state);
+	pr_debug("sysfs_notify state:0x%0x\n", bd->props.state);
 
 	return 0;
 }
@@ -1526,7 +1526,7 @@ static int dsi_panel_bl_parse_hbm_node(struct device *parent,
 		"google,dsi-hbm-range-entry-command",
 		"google,dsi-hbm-range-commands-state", &range->entry_cmd);
 	if (rc)
-		pr_info("Unable to parse optional dsi-hbm-range-entry-command\n");
+		pr_debug("Unable to parse optional dsi-hbm-range-entry-command\n");
 
 	rc = of_property_read_u32(np,
 		"google,dsi-hbm-range-num-dimming-frames", &val);
@@ -1779,7 +1779,7 @@ static int dsi_panel_bl_parse_hbm(struct device *parent,
 
 	hbm_ranges_np = of_get_child_by_name(of_node, "google,hbm-ranges");
 	if (!hbm_ranges_np) {
-		pr_info("HBM modes list not found\n");
+		pr_debug("HBM modes list not found\n");
 		return 0;
 	}
 
@@ -1799,7 +1799,7 @@ static int dsi_panel_bl_parse_hbm(struct device *parent,
 		"google,dsi-hbm-exit-command",
 		"google,dsi-hbm-commands-state", &bl->hbm->exit_cmd);
 	if (rc)
-		pr_info("Unable to parse optional dsi-hbm-exit-command\n");
+		pr_debug("Unable to parse optional dsi-hbm-exit-command\n");
 
 	bl->hbm->num_ranges = num_ranges;
 
@@ -2183,7 +2183,7 @@ int dsi_panel_bl_update_irc(struct dsi_backlight_config *bl, bool enable)
 	bit_mask = BIT(hbm->irc_bit_offset % BITS_PER_BYTE);
 	irc_data_size = byte_offset + 1;
 
-	pr_info("irc update: %d\n", enable);
+	pr_debug("irc update: %d\n", enable);
 	dsi_panel_cmd_set_transfer(hbm->panel, &hbm->irc_unlock_cmd);
 	if (hbm->irc_data == NULL) {
 		hbm->irc_data = kzalloc(irc_data_size, GFP_KERNEL);
@@ -2198,7 +2198,7 @@ int dsi_panel_bl_update_irc(struct dsi_backlight_config *bl, bool enable)
 			pr_err("failed to read irc.\n");
 			goto done;
 		}
-		pr_info("Read back irc initial configuration\n");
+		pr_debug("Read back irc initial configuration\n");
 	}
 
 	if (enable)
